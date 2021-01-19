@@ -1,17 +1,8 @@
 import math
 import pygame
 import time
+import random
 
-map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-       [1, 0, 0, 0, 1, 1, 0, 0, 0, 1],
-       [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-       [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-       [1, 0, 1, 0, 1, 0, 0, 0, 0, 1],
-       [1, 0, 1, 0, 1, 1, 0, 0, 0, 1],
-       [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-       [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-       [1, 0, 0, 1, 1, 0, 0, 0, 0, 1],
-       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], ]
 game = True
 window = pygame.display.set_mode((990, 990))
 carPos = (150, 150)
@@ -19,35 +10,31 @@ carAngle = 0
 
 
 class Ray:
-    def __init__(self, x, y, angle):
+    def __init__(self, x, y, ray_angle):
         self.x = x
         self.y = y
-        self.xAdd = math.cos(math.radians((90 + angle) - 180))
-        self.yAdd = math.cos(math.radians(angle))
+        self.xAdd = math.cos(math.radians((90 + ray_angle) - 180))
+        self.yAdd = math.cos(math.radians(ray_angle))
 
 
-def edges(mapList):
-    map_edges = []
-    for x in range(10):
-        for y in range(10):
-            if mapList[y][x] == 1:
-                q = (x * 100, y * 100)
-                if not q not in map_edges:
-                    map_edges.append(q)
-
-                q = (x * 100 + 100, y * 100)
-                if not q not in map_edges:
-                    map_edges.append(q)
-
-                q = (x * 100, y * 100 + 100)
-                if q not in map_edges:
-                    map_edges.append(q)
-
-                q = (x * 100 + 100, y * 100 + 100)
-                if q not in map_edges:
-                    map_edges.append(q)
-
-    return map_edges
+def create_map():
+    mymap = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], ]
+    for y in range(8):
+        for x in range(10):
+            if mymap[y + 1][x] == 0 and random.randint(0, 1) == 0:
+                mymap[y + 1][x] = 1
+    mymap[1][1] = 0
+    satisfied = False
+    return mymap
 
 
 def display(ray, n, mapList):
@@ -56,8 +43,9 @@ def display(ray, n, mapList):
     col = my_dist / 8
     if col > 100:
         col = 100
+    taille = ((990 / (my_dist + 1)) * 100 - math.sin(math.radians(n * (180 / 200))) * 20)
     pygame.draw.rect(window, (225 - col, 216 - col, 159 - col / 1.05),
-                     ((n * 5 - 2.5), ((990 - ((990 / (my_dist + 1)) * 100)) / 2), 5, ((990 / (my_dist + 1)) * 100)))
+                     (n * 5 - 2.5, (990 - (taille)) / 2, 5, taille))
 
 
 def inWall(mapList, posX, posY):
@@ -80,9 +68,9 @@ def Dist(ray, mapList):
     return int(x), int(y)
 
 
+map = create_map()
 while game:
     actualTime = time.process_time_ns()
-    list_edges = edges(map)
     window.fill((55, 64, 69))
     pygame.draw.rect(window, (14, 32, 43), (0, 0, 1000, 500))
 
