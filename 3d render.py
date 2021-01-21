@@ -17,8 +17,7 @@ class Ray:
         self.yAdd = math.cos(math.radians(ray_angle))
 
 
-def validate_map(mapList):
-    new_list = mapList.copy()
+def validate_map(new_list):
     new_list[1][1] = 2
     modified = True
     while modified:
@@ -66,19 +65,37 @@ def create_map():
                 if my_map[y + 1][x] == 0 and random.randint(0, 1) == 0:
                     my_map[y + 1][x] = 1
         my_map[1][1] = 0
-        cont = validate_map(my_map)
+        cont = validate_map(my_map.copy())
     return my_map
+
+
+def relative_Dist(pos):
+    x = pos[0] + 1
+    y = pos[1] + 1
+    x -= int(x/100) * 100
+    y -= int(y/100) * 100
+    if x > y:
+        return x
+    else:
+        return y
 
 
 def display(ray, n, mapList):
     wall_pos = Dist(ray, mapList)
+    relative_pos = relative_Dist(wall_pos)
     my_dist = math.sqrt((wall_pos[0] - int(carPos[0])) ** 2 + (wall_pos[1] - int(carPos[1])) ** 2)
     col = my_dist / 8
     if col > 100:
         col = 100
-    taille = ((990 / (my_dist + 1)) * 100 - math.sin(math.radians(n * (180 / 200))) * 20)
-    pygame.draw.rect(window, (225 - col, 216 - col, 159 - col / 1.05),
-                     (n * 5 - 2.5, (990 - (taille)) / 2, 5, taille))
+    height = ((990 / (my_dist + 1)) * 100 - math.sin(math.radians(n * (180 / 200))) * 20)
+
+    if 0 <= relative_pos < 25 or 50 <= relative_pos < 75:
+        col = int(col/10)
+        pygame.draw.rect(window, (14 - col, 32 - col, 43 - col / 1.05),
+                         (n * 5 - 2.5, (990 - (height)) / 2, 5, height))
+    if 25 <= relative_pos < 50 or 75 <= relative_pos < 100:
+        pygame.draw.rect(window, (180 - col, 184 - col, 171 - col / 1.05),
+                         (n * 5 - 2.5, (990 - (height)) / 2, 5, height))
 
 
 def inWall(mapList, posX, posY):
@@ -104,8 +121,8 @@ def Dist(ray, mapList):
 world_map = create_map()
 while game:
     actualTime = time.process_time_ns()
-    window.fill((55, 64, 69))
-    pygame.draw.rect(window, (14, 32, 43), (0, 0, 1000, 500))
+    window.fill((119, 98, 88))
+    pygame.draw.rect(window, (19, 111, 99), (0, 0, 1000, 500))
 
     allRays = []
     for j in range(200):
