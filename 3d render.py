@@ -6,7 +6,7 @@ import random
 game = True
 window = pygame.display.set_mode((990, 990))
 carPos = (150, 150)
-carAngle = 0
+carAngle = 180
 
 
 class Ray:
@@ -63,7 +63,7 @@ def create_map():
                   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
                   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
                   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], ]
+                  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
         for y in range(8):
             for x in range(10):
                 if my_map[y + 1][x] == 0 and random.randint(0, 1) == 0:
@@ -93,11 +93,11 @@ def display(ray, n, mapList):
         col = 100
     height = ((990 / (my_dist + 1)) * 100 - math.sin(math.radians(n * (180 / 200))) * 20)
 
-    if 0 <= relative_pos < 25 or 50 <= relative_pos < 75:
+    if 0 <= relative_pos < 25 / 2 or 25 / 2 + 25 < relative_pos < 25 / 2 + 50 or 25 / 2 + 75 < relative_pos <= 100:
         col = int(col / 10)
         pygame.draw.rect(window, [14 - col, 32 - col, 43 - col / 1.05],
                          [n * 5 - 2.5, (990 - height) / 2, 5, height])
-    if 25 <= relative_pos < 50 or 75 <= relative_pos < 100:
+    else:
         pygame.draw.rect(window, [180 - col, 184 - col, 171 - col / 1.05],
                          [n * 5 - 2.5, (990 - height) / 2, 5, height])
 
