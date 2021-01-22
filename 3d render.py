@@ -6,13 +6,14 @@ import random
 game = True
 window = pygame.display.set_mode((990, 990))
 carPos = (150, 150)
-carAngle = 90
+carAngle = 0
 
 
 class Ray:
     def __init__(self, x, y, ray_angle):
         self.x = x
         self.y = y
+        self.angle = ray_angle
         self.xAdd = math.cos(math.radians((90 + ray_angle) - 180))
         self.yAdd = math.cos(math.radians(ray_angle))
 
@@ -33,11 +34,13 @@ def validate_map(new_list):
                 for k in range(len(new_list)):
                     if new_list[i][k] == 0:
                         return False
-            for i in range(len(new_list)-2):
-                for k in range(len(new_list)-2):
-                    if new_list[i + 1][k + 1] == 1 and new_list[i + 2][k + 2] == 1 and new_list[i + 2][k + 1] == 2 and new_list[i + 1][k + 2] == 2:
+            for i in range(len(new_list) - 2):
+                for k in range(len(new_list) - 2):
+                    if new_list[i + 1][k + 1] == 1 and new_list[i + 2][k + 2] == 1 and new_list[i + 2][k + 1] == 2 and \
+                            new_list[i + 1][k + 2] == 2:
                         return False
-                    if new_list[i + 1][k + 1] == 2 and new_list[i + 2][k + 2] == 2 and new_list[i + 2][k + 1] == 1 and new_list[i + 1][k + 2] == 1:
+                    if new_list[i + 1][k + 1] == 2 and new_list[i + 2][k + 2] == 2 and new_list[i + 2][k + 1] == 1 and \
+                            new_list[i + 1][k + 2] == 1:
                         return False
 
     for x in range(len(new_list)):
@@ -49,6 +52,7 @@ def validate_map(new_list):
 
 def create_map():
     cont = False
+    my_map = []
     while not cont:
         my_map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -69,11 +73,11 @@ def create_map():
     return my_map
 
 
-def relative_Dist(pos):
+def relative_dist(pos):
     x = pos[0] + 1
     y = pos[1] + 1
-    x -= int(x/100) * 100
-    y -= int(y/100) * 100
+    x -= int(x / 100) * 100
+    y -= int(y / 100) * 100
     if x > y:
         return x
     else:
@@ -81,8 +85,8 @@ def relative_Dist(pos):
 
 
 def display(ray, n, mapList):
-    wall_pos = Dist(ray, mapList)
-    relative_pos = relative_Dist(wall_pos)
+    wall_pos = dist(ray, mapList)
+    relative_pos = relative_dist(wall_pos)
     my_dist = math.sqrt((wall_pos[0] - int(carPos[0])) ** 2 + (wall_pos[1] - int(carPos[1])) ** 2)
     col = my_dist / 8
     if col > 100:
@@ -90,7 +94,7 @@ def display(ray, n, mapList):
     height = ((990 / (my_dist + 1)) * 100 - math.sin(math.radians(n * (180 / 200))) * 20)
 
     if 0 <= relative_pos < 25 or 50 <= relative_pos < 75:
-        col = int(col/10)
+        col = int(col / 10)
         pygame.draw.rect(window, (14 - col, 32 - col, 43 - col / 1.05),
                          (n * 5 - 2.5, (990 - (height)) / 2, 5, height))
     if 25 <= relative_pos < 50 or 75 <= relative_pos < 100:
@@ -98,24 +102,60 @@ def display(ray, n, mapList):
                          (n * 5 - 2.5, (990 - (height)) / 2, 5, height))
 
 
-def inWall(mapList, posX, posY):
+def in_wall(mapList, posX, posY):
+    if posX < 0 or posY < 0 or posX >= 999 or posY >= 999:
+        return False
     x = int(posX / 100)
     y = int(posY / 100)
+    if mapList[y][x] == 1:
+        return True
+    x = int((posX - 1) / 100)
+    y = int((posY - 1) / 100)
     if mapList[y][x] == 1:
         return True
     return False
 
 
-def Dist(ray, mapList):
+def dist(ray, mapList):
     x = ray.x
     y = ray.y
-    while not inWall(mapList, int(x), int(y)):
-        x += ray.xAdd * 10
-        y += ray.yAdd * 10
-    while inWall(mapList, int(x), int(y)):
-        x -= ray.xAdd
-        y -= ray.yAdd
-    return int(x), int(y)
+    rel_x = []
+    if ray.angle < 90 or ray.angle > 270:
+        for i in range(int(y / 100) + 1):
+            rel_x.append([math.tan(math.radians(ray.angle)) * (y - i * 100) + x, i * 100])
+    else:
+        for i in range(int((1000 - y) / 100) + 1):
+            rel_x.append([math.tan(math.radians(180 - ray.angle)) * ((1000 - i * 100) - y) + x, (10 - i) * 100])
+    rel_y = []
+    if 0 < ray.angle < 180:
+        for i in range(int((1000 - x) / 100) + 1):
+            rel_y.append([(10 - i) * 100, math.tan(math.radians(ray.angle - 90)) * (((10 - i) * 100) - x) + y])
+
+    else:
+        for i in range(int(x / 100) + 1):
+            rel_y.append([i * 100, math.tan(math.radians(270 - ray.angle)) * (x - i * 100) + y])
+
+    best_x = None
+    for i in range(len(rel_x)):
+        if in_wall(mapList, rel_x[i][0], rel_x[i][1]):
+            best_x = rel_x[i]
+
+    best_y = None
+    for i in range(len(rel_y)):
+        if in_wall(mapList, rel_y[i][0], rel_y[i][1]):
+            best_y = rel_y[i]
+
+    if best_x is None:
+        return best_y
+    if best_y is None:
+        return best_x
+
+    dist_x = math.sqrt((best_x[0] - int(carPos[0])) ** 2 + (best_x[1] - int(carPos[1])) ** 2)
+    dist_y = math.sqrt((best_y[0] - int(carPos[0])) ** 2 + (best_y[1] - int(carPos[1])) ** 2)
+
+    if dist_x > dist_y:
+        return best_y
+    return best_x
 
 
 world_map = create_map()
@@ -150,24 +190,24 @@ while game:
             carAngle -= 360
 
     if keys[pygame.K_z]:
-        newPos = ((carPos[0] + math.cos(math.radians((90 + carAngle) - 180)) * 2),
-                  (carPos[1] + math.cos(math.radians(carAngle)) * 2))
-        if not inWall(world_map, newPos[0], newPos[1]):
+        newPos = ((carPos[0] - math.sin(math.radians(-carAngle)) * 2),
+                  (carPos[1] - math.cos(math.radians(-carAngle)) * 2))
+        if not in_wall(world_map, newPos[0], newPos[1]):
             carPos = newPos
     if keys[pygame.K_s]:
-        newPos = ((carPos[0] - math.cos(math.radians((90 + carAngle) - 180)) * 2),
-                  (carPos[1] - math.cos(math.radians(carAngle)) * 2))
-        if not inWall(world_map, newPos[0], newPos[1]):
+        newPos = ((carPos[0] + math.sin(math.radians(-carAngle)) * 2),
+                  (carPos[1] + math.cos(math.radians(-carAngle)) * 2))
+        if not in_wall(world_map, newPos[0], newPos[1]):
             carPos = newPos
     if keys[pygame.K_d]:
-        newPos = ((carPos[0] + math.cos(math.radians((90 + carAngle + 90) - 180)) * 2),
-                  (carPos[1] + math.cos(math.radians(carAngle + 90)) * 2))
-        if not inWall(world_map, newPos[0], newPos[1]):
+        newPos = ((carPos[0] + math.sin(math.radians(-carAngle + 90)) * 2),
+                  (carPos[1] + math.cos(math.radians(-carAngle + 90)) * 2))
+        if not in_wall(world_map, newPos[0], newPos[1]):
             carPos = newPos
     if keys[pygame.K_q]:
-        newPos = ((carPos[0] - math.cos(math.radians((90 + carAngle + 90) - 180)) * 2),
-                  (carPos[1] - math.cos(math.radians(carAngle + 90)) * 2))
-        if not inWall(world_map, newPos[0], newPos[1]):
+        newPos = ((carPos[0] + math.sin(math.radians(-carAngle + 270)) * 2),
+                  (carPos[1] + math.cos(math.radians(-carAngle + 270)) * 2))
+        if not in_wall(world_map, newPos[0], newPos[1]):
             carPos = newPos
 
     for event in pygame.event.get():
