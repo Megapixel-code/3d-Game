@@ -9,19 +9,20 @@ carAngle = 180
 
 # ====================================================== TEXTURES ======================================================
 
+# good website for colors : https://coolors.co/
 gray = (49, 47, 47)
 white = (246, 232, 234)
 
 wall_1 = [[gray, gray, gray, gray, gray, gray, gray, gray, gray, gray],
-        [gray, gray, white, white, white, white, white, white, gray, gray],
-        [gray, white, gray, white, white, white, white, gray, white, gray],
-        [gray, white, white, gray, white, white, gray, white, white, gray],
-        [gray, white, white, white, gray, gray, white, white, white, gray],
-        [gray, white, white, white, gray, gray, white, white, white, gray],
-        [gray, white, white, gray, white, white, gray, white, white, gray],
-        [gray, white, gray, white, white, white, white, gray, white, gray],
-        [gray, gray, white, white, white, white, white, white, gray, gray],
-        [gray, gray, gray, gray, gray, gray, gray, gray, gray, gray]]
+          [gray, gray, white, white, white, white, white, white, gray, gray],
+          [gray, white, gray, white, white, white, white, gray, white, gray],
+          [gray, white, white, gray, white, white, gray, white, white, gray],
+          [gray, white, white, white, gray, gray, white, white, white, gray],
+          [gray, white, white, white, gray, gray, white, white, white, gray],
+          [gray, white, white, gray, white, white, gray, white, white, gray],
+          [gray, white, gray, white, white, white, white, gray, white, gray],
+          [gray, gray, white, white, white, white, white, white, gray, gray],
+          [gray, gray, gray, gray, gray, gray, gray, gray, gray, gray]]
 
 wall_2 = [[gray, gray, gray, gray, gray, gray, gray, gray, gray, gray],
           [gray, white, gray, white, gray, gray, white, gray, white, gray],
