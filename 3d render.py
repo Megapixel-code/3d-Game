@@ -4,7 +4,6 @@ import time
 import random
 
 game = True
-window = pygame.display.set_mode((990, 990))
 carPos = (150, 150)
 carAngle = 180
 
@@ -13,7 +12,7 @@ carAngle = 180
 gray = (49, 47, 47)
 white = (246, 232, 234)
 
-wall = [[gray, gray, gray, gray, gray, gray, gray, gray, gray, gray],
+wall_1 = [[gray, gray, gray, gray, gray, gray, gray, gray, gray, gray],
         [gray, gray, white, white, white, white, white, white, gray, gray],
         [gray, white, gray, white, white, white, white, gray, white, gray],
         [gray, white, white, gray, white, white, gray, white, white, gray],
@@ -34,6 +33,10 @@ wall_2 = [[gray, gray, gray, gray, gray, gray, gray, gray, gray, gray],
           [gray, white, gray, white, gray, gray, white, gray, white, gray],
           [gray, white, gray, white, gray, gray, white, gray, white, gray],
           [gray, gray, gray, gray, gray, gray, gray, gray, gray, gray]]
+
+all_walls = [wall_1, wall_2]
+del gray, white
+del wall_1, wall_2
 
 
 # ====================================================== TEXTURES ======================================================
@@ -271,8 +274,38 @@ def render():
         display(all_rays[j], j, world_map)
 
 
-textures = normalize_textures([wall, wall_2])
+# ______________ MOVEMENT ______________
+
+
+def walk(my_angle):
+    global carPos
+
+    if my_angle > 360:
+        my_angle -= 360
+    elif my_angle < 0:
+        my_angle += 360
+
+    new_pos = ((carPos[0] - math.sin(math.radians(-my_angle)) * 2),
+               (carPos[1] - math.cos(math.radians(-my_angle)) * 2))
+    if not in_wall(world_map, new_pos[0], new_pos[1], Ray(carPos[0], carPos[1], my_angle)):
+        carPos = new_pos
+        return
+
+    new_pos = ((carPos[0] - math.sin(math.radians(-my_angle)) * 2), carPos[1])
+    if not in_wall(world_map, new_pos[0], new_pos[1], Ray(carPos[0], carPos[1], my_angle)):
+        carPos = new_pos
+        return
+
+    new_pos = (carPos[0], (carPos[1] - math.cos(math.radians(-my_angle)) * 2))
+    if not in_wall(world_map, new_pos[0], new_pos[1], Ray(carPos[0], carPos[1], my_angle)):
+        carPos = new_pos
+        return
+
+
+textures = normalize_textures(all_walls)
+del all_walls
 world_map = create_map()
+window = pygame.display.set_mode((990, 990))
 while game:
     # ===================================== INITIALIZATION OF VARIABLE AND SCREEN =====================================
 
@@ -303,25 +336,13 @@ while game:
             carAngle -= 360
 
     if keys[pygame.K_z]:
-        newPos = ((carPos[0] - math.sin(math.radians(-carAngle)) * 2),
-                  (carPos[1] - math.cos(math.radians(-carAngle)) * 2))
-        if not in_wall(world_map, newPos[0], newPos[1], Ray(carPos[0], carPos[1], carAngle)):
-            carPos = newPos
+        walk(carAngle)
     if keys[pygame.K_s]:
-        newPos = ((carPos[0] + math.sin(math.radians(-carAngle)) * 2),
-                  (carPos[1] + math.cos(math.radians(-carAngle)) * 2))
-        if not in_wall(world_map, newPos[0], newPos[1], Ray(carPos[0], carPos[1], carAngle)):
-            carPos = newPos
+        walk(carAngle + 180)
     if keys[pygame.K_d]:
-        newPos = ((carPos[0] + math.sin(math.radians(-carAngle + 90)) * 2),
-                  (carPos[1] + math.cos(math.radians(-carAngle + 90)) * 2))
-        if not in_wall(world_map, newPos[0], newPos[1], Ray(carPos[0], carPos[1], carAngle)):
-            carPos = newPos
+        walk(carAngle + 90)
     if keys[pygame.K_q]:
-        newPos = ((carPos[0] + math.sin(math.radians(-carAngle + 270)) * 2),
-                  (carPos[1] + math.cos(math.radians(-carAngle + 270)) * 2))
-        if not in_wall(world_map, newPos[0], newPos[1], Ray(carPos[0], carPos[1], carAngle)):
-            carPos = newPos
+        walk(carAngle + 270)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
