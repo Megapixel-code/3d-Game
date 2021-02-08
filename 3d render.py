@@ -14,25 +14,25 @@ gray = (49, 47, 47)
 white = (246, 232, 234)
 
 wall_1 = [[gray, gray, gray, gray, gray, gray, gray, gray, gray, gray],
-          [gray, gray, white, white, white, white, white, white, gray, gray],
-          [gray, white, gray, white, white, white, white, gray, white, gray],
-          [gray, white, white, gray, white, white, gray, white, white, gray],
-          [gray, white, white, white, gray, gray, white, white, white, gray],
-          [gray, white, white, white, gray, gray, white, white, white, gray],
-          [gray, white, white, gray, white, white, gray, white, white, gray],
-          [gray, white, gray, white, white, white, white, gray, white, gray],
-          [gray, gray, white, white, white, white, white, white, gray, gray],
+          [white, white, white, white, white, white, white, white, white, white],
+          [white, white, gray, gray, gray, gray, gray, gray, white, white],
+          [gray, gray, gray, white, white, white, white, gray, gray, gray],
+          [white, white, white, white, gray, gray, white, white, white, white],
+          [white, white, white, white, gray, gray, white, white, white, white],
+          [gray, gray, gray, white, white, white, white, gray, gray, gray],
+          [white, white, gray, gray, gray, gray, gray, gray, white, white],
+          [white, white, white, white, white, white, white, white, white, white],
           [gray, gray, gray, gray, gray, gray, gray, gray, gray, gray]]
 
 wall_2 = [[gray, gray, gray, gray, gray, gray, gray, gray, gray, gray],
+          [gray, white, white, white, white, white, white, white, white, gray],
+          [gray, white, gray, gray, gray, gray, gray, gray, white, gray],
+          [gray, white, gray, white, white, white, white, gray, white, gray],
           [gray, white, gray, white, gray, gray, white, gray, white, gray],
           [gray, white, gray, white, gray, gray, white, gray, white, gray],
-          [gray, white, gray, white, gray, gray, white, gray, white, gray],
-          [gray, white, gray, white, gray, gray, white, gray, white, gray],
-          [gray, white, gray, white, gray, gray, white, gray, white, gray],
-          [gray, white, gray, white, gray, gray, white, gray, white, gray],
-          [gray, white, gray, white, gray, gray, white, gray, white, gray],
-          [gray, white, gray, white, gray, gray, white, gray, white, gray],
+          [gray, white, gray, white, white, white, white, gray, white, gray],
+          [gray, white, gray, gray, gray, gray, gray, gray, white, gray],
+          [gray, white, white, white, white, white, white, white, white, gray],
           [gray, gray, gray, gray, gray, gray, gray, gray, gray, gray]]
 
 all_walls = [wall_1, wall_2]
@@ -243,7 +243,6 @@ def dist(ray, mapList):
     for i in range(len(rel_x)):
         if in_wall(mapList, rel_x[i][0], rel_x[i][1], ray):
             best_x = rel_x[i]
-
     best_y = None
     for i in range(len(rel_y)):
         if in_wall(mapList, rel_y[i][0], rel_y[i][1], ray):
@@ -265,7 +264,7 @@ def dist(ray, mapList):
 def render():
     all_rays = []
     for j in range(200):
-        angle = carAngle + j / 4 - 25
+        angle = carAngle + j / 4 - 24.75
         if angle < 0:
             angle += 360
         elif angle >= 360:
@@ -306,7 +305,7 @@ def walk(my_angle):
 textures = normalize_textures(all_walls)
 del all_walls
 world_map = create_map()
-window = pygame.display.set_mode((990, 990))
+window = pygame.display.set_mode((995, 995))
 while game:
     # ===================================== INITIALIZATION OF VARIABLE AND SCREEN =====================================
 
@@ -322,6 +321,8 @@ while game:
 
     if time.process_time_ns() < actualTime + 30000000:
         time.sleep(0.01)
+    pygame.draw.circle(window, (255, 255, 255), [500, 500], 5, 3)
+    pygame.draw.circle(window, (0, 0, 0), [500, 500], 4, 1)
     pygame.display.update()
 
     # ========================================== KEYS DETECTIONS AND MOVEMENT ==========================================
