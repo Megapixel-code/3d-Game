@@ -4,40 +4,43 @@ import time
 import random
 
 game = True
-carPos = (150, 150)
+carPos = (150.5, 150.5)
 carAngle = 180
 
 # ====================================================== TEXTURES ======================================================
 
 # good website for colors : https://coolors.co/
-gray = (49, 47, 47)
-white = (246, 232, 234)
+gray1 = (162, 162, 162)
+gray2 = (127, 127, 127)
+gray3 = (51, 51, 51)
+noir = (0, 0, 0)
+orange1 = (232, 92, 0)
+orange2 = (255, 127, 39)
 
-wall_1 = [[gray, gray, gray, gray, gray, gray, gray, gray, gray, gray],
-          [white, white, white, white, white, white, white, white, white, white],
-          [white, white, gray, gray, gray, gray, gray, gray, white, white],
-          [gray, gray, gray, white, white, white, white, gray, gray, gray],
-          [white, white, white, white, gray, gray, white, white, white, white],
-          [white, white, white, white, gray, gray, white, white, white, white],
-          [gray, gray, gray, white, white, white, white, gray, gray, gray],
-          [white, white, gray, gray, gray, gray, gray, gray, white, white],
-          [white, white, white, white, white, white, white, white, white, white],
-          [gray, gray, gray, gray, gray, gray, gray, gray, gray, gray]]
+wall_1 = [[gray1, gray1, gray1, gray1, gray1, gray1, gray1, gray1, gray1, gray1],
+          [gray2, gray2, gray2, gray2, gray2, gray2, gray2, gray2, gray2, gray2],
+          [gray2, gray2, gray3, gray3, gray3, gray3, gray3, gray3, gray2, gray2],
+          [noir, noir, noir, gray2, gray2, gray2, gray2, noir, noir, noir],
+          [gray2, gray2, gray2, gray2, gray2, gray2, gray2, gray2, gray2, gray2],
+          [orange2, noir, noir, gray3, orange1, orange2, noir, noir, gray3, orange1],
+          [orange1, orange2, noir, noir, gray3, orange1, orange2, noir, noir, gray3],
+          [gray2, gray2, gray2, gray2, gray2, gray2, gray2, gray2, gray2, gray2],
+          [gray2, gray2, gray2, gray2, gray2, gray2, gray2, gray2, gray2, gray2],
+          [noir, noir, noir, noir, noir, noir, noir, noir, noir, noir]]
 
-wall_2 = [[gray, gray, gray, gray, gray, gray, gray, gray, gray, gray],
-          [gray, white, white, white, white, white, white, white, white, gray],
-          [gray, white, gray, gray, gray, gray, gray, gray, white, gray],
-          [gray, white, gray, white, white, white, white, gray, white, gray],
-          [gray, white, gray, white, gray, gray, white, gray, white, gray],
-          [gray, white, gray, white, gray, gray, white, gray, white, gray],
-          [gray, white, gray, white, white, white, white, gray, white, gray],
-          [gray, white, gray, gray, gray, gray, gray, gray, white, gray],
-          [gray, white, white, white, white, white, white, white, white, gray],
-          [gray, gray, gray, gray, gray, gray, gray, gray, gray, gray]]
+mob1 = [[gray1, gray1, gray1, gray1],
+        [gray1, noir, gray1, gray1],
+        [gray1, gray1, gray1, gray1],
+        [gray1, gray1, gray1, gray1],
+        [gray1, gray1, gray1, gray1],
+        [gray1, gray1, gray1, gray1],
+        [gray1, gray1, gray1, gray1],
+        [gray1, noir, gray1, gray1]]
 
-all_walls = [wall_1, wall_2]
-del gray, white
-del wall_1, wall_2
+all_mobs = [mob1]
+all_walls = [wall_1]
+del gray1, gray2, gray3, noir, orange1, orange2
+del wall_1, mob1
 
 
 # ====================================================== TEXTURES ======================================================
@@ -53,11 +56,17 @@ class Ray:
 
 
 class Mob:
-    def __init__(self, x, y, lvl):
-        self.health = lvl
-        self.x = x
-        self.y = y
+    def __init__(self, lvl):
+        self.health = lvl * 2
         self.lvl = lvl
+        finished = False
+        while not finished:
+            finished = True
+            self.x = random.randint(0, 1000)
+            self.y = random.randint(0, 1000)
+            for i in range(4):
+                if in_wall(world_map, self.x, self.y, Ray(self.x, self.y, i * 90)):
+                    finished = False
 
     def move(self):
         pass
@@ -80,6 +89,9 @@ class Mob:
         if relative_x <= 0 and relative_y <= 0:
             return mob_angle + 360
 
+    def give_dist(self, pos):
+        return math.sqrt((self.x - pos[0]) ** 2 + (self.y - pos[1]) ** 2)
+
 
 # ______________ TWEAKING TEXTURES ______________
 
@@ -88,13 +100,21 @@ def normalize_textures(my_list):
     all_textures = []
     for e in my_list:
         temp = []
-        for i in range(10):
+        for i in range(len(e[0])):
             temp_2 = []
-            for j in range(10):
+            for j in range(len(e)):
                 temp_2.append(e[j][-(i + 1)])
             temp.append(temp_2)
         all_textures.append(temp)
     return all_textures
+
+# ______________ OTHERS ______________
+
+
+def rest(number):
+    if number >= 0:
+        return number - int(number / 360) * 360
+    return number - int(number / 360) * 360 + 360
 
 
 # ______________ MAP MODIFICATIONS ______________
@@ -177,11 +197,11 @@ def give_wall(pos, mapList):
                 return x
 
 
-def display(ray, n, mapList):
+def display(ray, n, mapList, mobs_angle, mobs_distance, sizes):
     wall_pos = dist(ray, mapList)
     relative_pos = relative_dist(wall_pos)
     my_dist = math.sqrt((wall_pos[0] - int(carPos[0])) ** 2 + (wall_pos[1] - int(carPos[1])) ** 2)
-    height = ((990 / (my_dist + 1)) * 100 - math.sin(math.radians(n * (180 / 200))) * 20)
+    height = ((1000 / (my_dist + 1)) * 100 - math.sin(math.radians(n * (180 / 200))) * 20)
 
     color_cor = my_dist / 200
     if color_cor < 1:
@@ -204,6 +224,24 @@ def display(ray, n, mapList):
             col = my_wall[int(relative_pos[0] / 10)][i]
             pygame.draw.rect(window, [int(col[0] / color_cor), int(col[1] / color_cor), int(col[2] / color_cor)],
                              [n * 5 - 2.5, (1000 - height) / 2 + height / 10 * i, 5, height / 10 + 1])
+
+    mobs_start_positions = []
+    for i in range(len(mobs)):
+        mobs_start_positions.append(mobs_angle[i] - (sizes[i] * 0.25) / 2)
+    for j in range(len(mobs)):
+        mob_color_cor = mobs_distance[j] / 200
+        if mob_color_cor < 1:
+            mob_color_cor = 1
+
+        if mobs_angle[j] - sizes[j] * 0.25 / 2 < ray.angle <= mobs_angle[j] + sizes[j] * 0.25 / 2 and mobs_distance[j] \
+                <= my_dist or mobs_angle[j] - 360 - sizes[j] * 0.25 / 2 < ray.angle <= mobs_angle[j] - 360 + sizes[j] *\
+                0.25 / 2 and mobs_distance[j] <= my_dist or mobs_angle[j] + 360 - sizes[j] * 0.25 / 2 < ray.angle <= \
+                mobs_angle[j] + 360 + sizes[j] * 0.25 / 2 and mobs_distance[j] <= my_dist:
+            mob_height = ((1000 / (mobs_distance[j] + 1)) * 100 - math.sin(math.radians(n * (180 / 200))) * 20) * 0.7
+            col = mobs_textures[mobs[j].lvl][int(rest((ray.angle - mobs_angle[j]) + (sizes[j] * 0.25) / 2)/(sizes[j] /
+                                                                                                            16))]
+            for k in range(8):
+                pygame.draw.rect(window, [int(col[k][0] / mob_color_cor), int(col[k][1] / mob_color_cor), int(col[k][2] / mob_color_cor)], [n * 5 - 2.5, ((3999 - mob_height / 0.7) / 8) + k * ((mob_height + 1) / 8), 5, (mob_height + 1) / 8 + 1])
 
 
 def in_wall(mapList, posX, posY, ray):
@@ -261,6 +299,20 @@ def dist(ray, mapList):
     return best_x
 
 
+def sort_mobs():
+    distances = []
+    for m in mobs:
+        distances.append(m.give_dist(carPos))
+    sorted_distances = distances.copy()
+    sorted_distances.sort()
+    sorted_distances.reverse()
+    while distances != sorted_distances:
+        for i in range(len(mobs) - 1):
+            if distances[i] < distances[i + 1]:
+                distances[i], distances[i + 1] = distances[i + 1], distances[i]
+                mobs[i], mobs[i + 1] = mobs[i + 1], mobs[i]
+
+
 def render():
     all_rays = []
     for j in range(200):
@@ -270,8 +322,19 @@ def render():
         elif angle >= 360:
             angle -= 360
         all_rays.append(Ray(int(carPos[0]), int(carPos[1]), angle))
-    for j in range(len(all_rays)):
-        display(all_rays[j], j, world_map)
+
+    sort_mobs()
+    m_angles = []
+    m_distances = []
+    m_sizes = []
+    for m in mobs:
+        m_angles.append(m.give_angle())
+        m_distances.append(m.give_dist(carPos))
+        m_sizes.append(int(1000 / (m.give_dist(carPos) + 1) * 5))
+    j = 0
+    for r in all_rays:
+        display(r, j, world_map, m_angles, m_distances, m_sizes)
+        j += 1
 
 
 # ______________ MOVEMENT ______________
@@ -303,13 +366,19 @@ def walk(my_angle):
 
 
 textures = normalize_textures(all_walls)
-del all_walls
+mobs_textures = normalize_textures(all_mobs)
+del all_walls, all_mobs
+right = 0
+left = 0
 world_map = create_map()
 window = pygame.display.set_mode((995, 995))
+mobs = []
+for _ in range(5):
+    mobs.append(Mob(0))
 while game:
     # ===================================== INITIALIZATION OF VARIABLE AND SCREEN =====================================
 
-    actualTime = time.process_time_ns()
+    actualTime = time.time()
     window.fill((119, 98, 88))
     pygame.draw.rect(window, (19, 111, 99), (0, 0, 1000, 500))
 
@@ -317,10 +386,13 @@ while game:
 
     render()
 
-    # =================================== WAITING FOR THE END OF THE FRAME (~30 FPS) ===================================
+    # =================================== WAITING FOR THE END OF THE FRAME (~60 FPS) ===================================
 
-    if time.process_time_ns() < actualTime + 30000000:
-        time.sleep(0.01)
+    while time.time() < actualTime + 1 / 60:
+        time.sleep(0.00001)
+
+    # ===================================== ADDING CURSOR AND UPDATING THE SCREEN =====================================
+
     pygame.draw.circle(window, (255, 255, 255), [500, 500], 5, 3)
     pygame.draw.circle(window, (0, 0, 0), [500, 500], 4, 1)
     pygame.display.update()
@@ -329,13 +401,29 @@ while game:
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
-        carAngle -= 1.5
+        left += 1
+        if left >= 30:
+            carAngle -= 3
+        elif left >= 10:
+            carAngle -= 2
+        else:
+            carAngle -= 1
         if carAngle < 0:
             carAngle += 360
+    else:
+        left = 0
     if keys[pygame.K_RIGHT]:
-        carAngle += 1.5
+        right += 1
+        if right >= 30:
+            carAngle += 3
+        elif right >= 10:
+            carAngle += 2
+        else:
+            carAngle += 1
         if carAngle >= 360:
             carAngle -= 360
+    else:
+        right = 0
 
     if keys[pygame.K_z]:
         walk(carAngle)
